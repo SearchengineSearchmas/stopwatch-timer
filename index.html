@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Stopwatch & Timer</title>
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: #fff;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #display {
+    font-size: 60px;
+    font-weight: bold;
+    background: rgba(0,0,0,0.3);
+    padding: 20px 40px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 20px #000;
+  }
+
+  button {
+    font-size: 18px;
+    padding: 12px 25px;
+    margin: 5px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-weight: bold;
+  }
+
+  button:hover {
+    transform: scale(1.1);
+  }
+
+  .start { background: #4caf50; color: #fff; }
+  .stop { background: #f44336; color: #fff; }
+  .reset { background: #ff9800; color: #fff; }
+  .timer { background: #2196f3; color: #fff; }
+
+  #timerInput {
+    font-size: 18px;
+    padding: 5px;
+    border-radius: 8px;
+    width: 80px;
+    text-align: center;
+    margin-right: 10px;
+  }
+</style>
+</head>
+<body>
+  <div id="display">00:00:00.000</div>
+
+  <div>
+    <button class="start" onclick="start()">Start</button>
+    <button class="stop" onclick="stop()">Stop</button>
+    <button class="reset" onclick="reset()">Reset</button>
+  </div>
+
+  <div style="margin-top:15px;">
+    <input id="timerInput" type="number" placeholder="Seconds">
+    <button class="timer" onclick="startTimer()">Start Timer</button>
+  </div>
+
+<script>
+let startTime = 0;
+let elapsed = 0;
+let timer = null;
+let timerMode = false;
+let timerTarget = 0;
+
+function updateDisplay() {
+    let total = elapsed + (startTime ? Date.now() - startTime : 0);
+
+    if (timerMode) {
+        total = timerTarget - total;
+        if (total <= 0) {
+            total = 0;
+            stop();
+            alert("⏰ Timer Finished!");
+        }
+    }
+
+    let ms = total % 1000;
+    let secs = Math.floor(total / 1000) % 60;
+    let mins = Math.floor(total / 60000) % 60;
+    let hrs = Math.floor(total / 3600000);
+
+    document.getElementById('display').textContent =
+        String(hrs).padStart(2,'0') + ':' +
+        String(mins).padStart(2,'0') + ':' +
+        String(secs).padStart(2,'0') + '.' +
+        String(ms).padStart(3,'0');
+}
+
+function start() {
+    if (!timer) {
+        startTime = Date.now();
+        timerMode = false;
+        timer = requestAnimationFrame(tick);
+    }
+}
+
+function stop() {
+    if (timer) {
+        elapsed += Date.now() - startTime;
+        startTime = 0;
+        cancelAnimationFrame(timer);
+        timer = null;
+    }
+}
+
+function reset() {
+    stop();
+    elapsed = 0;
+    timerMode = false;
+    document.getElementById('display').textContent = "00:00:00.000";
+}
+
+function tick() {
+    updateDisplay();
+    timer = requestAnimationFrame(tick);
+}
+
+function startTimer() {
+    let seconds = parseInt(document.getElementById('timerInput').value);
+    if (isNaN(seconds) || seconds <= 0) {
+        alert("Please enter a valid number of seconds!");
+        return;
+    }
+    reset();
+    timerMode = true;
+    timerTarget = seconds * 1000;
+    startTime = Date.now();
+    timer = requestAnimationFrame(tick);
+}
+</script>
+</body>
+</html>
