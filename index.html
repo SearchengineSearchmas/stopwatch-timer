@@ -73,23 +73,6 @@ let raf = null;
 let timerMode = false;
 let timerTarget = 0;
 
-/* ULTRA SOFT BEEP */
-function softBeep() {
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-
-  osc.type = "sine";
-  osc.frequency.value = 800;   // soft pitch
-  gain.gain.value = 0.03;      // VERY quiet
-
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-
-  osc.start();
-  osc.stop(ctx.currentTime + 0.08); // very short
-}
-
 function updateDisplay() {
   let total = elapsed + (startTime ? Date.now() - startTime : 0);
 
@@ -97,8 +80,7 @@ function updateDisplay() {
     total = timerTarget - total;
     if (total <= 0) {
       total = 0;
-      stop();
-      softBeep(); // gentle click
+      stop(); // no sound, just stop
     }
   }
 
