@@ -87,12 +87,13 @@ function updateDisplay() {
         if (total <= 0) {
             total = 0;
             stop();
-            alert("⏰ Timer Finished!");
+            
         }
     }
 
     let ms = total % 1000;
-    let secs = Math.floor(total / 1000) % 60;
+    let secs = Math.floor(to<audio id="timerSound" src="https://www.soundjay.com/buttons/sounds/beep-07.mp3" preload="auto"></audio>
+tal / 1000) % 60;
     let mins = Math.floor(total / 60000) % 60;
     let hrs = Math.floor(total / 3600000);
 
@@ -141,6 +142,7 @@ function startTimer() {
     reset();
     timerMode = true;
     timerTarget = seconds * 1000;
+
     startTime = Date.now();
     timer = requestAnimationFrame(tick);
 }
