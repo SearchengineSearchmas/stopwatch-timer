@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Stopwatch & Timer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
   body {
     font-family: 'Arial', sans-serif;
@@ -39,9 +40,7 @@
     font-weight: bold;
   }
 
-  button:hover {
-    transform: scale(1.1);
-  }
+  button:hover { transform: scale(1.1); }
 
   .start { background: #4caf50; color: #fff; }
   .stop { background: #f44336; color: #fff; }
@@ -63,14 +62,14 @@
 <div id="display">00:00:00.000</div>
 
 <div>
-  <button class="start" onclick="start()">Start</button>
-  <button class="stop" onclick="stop()">Stop</button>
-  <button class="reset" onclick="reset()">Reset</button>
+  <button class="start" id="startBtn">Start</button>
+  <button class="stop" id="stopBtn">Stop</button>
+  <button class="reset" id="resetBtn">Reset</button>
 </div>
 
 <div style="margin-top:15px;">
   <input id="timerInput" type="number" placeholder="Seconds">
-  <button class="timer" onclick="startTimer()">Start Timer</button>
+  <button class="timer" id="timerBtn">Start Timer</button>
 </div>
 
 <!-- Timer sound -->
@@ -91,7 +90,7 @@ function updateDisplay() {
         if (total <= 0) {
             total = 0;
             stop();
-            document.getElementById('timerSound').play(); // sound effect
+            document.getElementById('timerSound').play();
         }
     }
 
@@ -105,6 +104,11 @@ function updateDisplay() {
         String(mins).padStart(2,'0') + ':' +
         String(secs).padStart(2,'0') + '.' +
         String(ms).padStart(3,'0');
+}
+
+function tick() {
+    updateDisplay();
+    timer = requestAnimationFrame(tick);
 }
 
 function start() {
@@ -131,11 +135,6 @@ function reset() {
     document.getElementById('display').textContent = "00:00:00.000";
 }
 
-function tick() {
-    updateDisplay();
-    timer = requestAnimationFrame(tick);
-}
-
 function startTimer() {
     let seconds = parseInt(document.getElementById('timerInput').value);
     if (isNaN(seconds) || seconds <= 0) {
@@ -148,6 +147,13 @@ function startTimer() {
     startTime = Date.now();
     timer = requestAnimationFrame(tick);
 }
+
+// Attach button events safely
+document.getElementById('startBtn').addEventListener('click', start);
+document.getElementById('stopBtn').addEventListener('click', stop);
+document.getElementById('resetBtn').addEventListener('click', reset);
+document.getElementById('timerBtn').addEventListener('click', startTimer);
 </script>
+
 </body>
 </html>
