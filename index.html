@@ -6,54 +6,48 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
   body {
-    font-family: 'Arial', sans-serif;
+    font-family: Arial, sans-serif;
     background: linear-gradient(135deg, #1e3c72, #2a5298);
     color: #fff;
-    text-align: center;
     margin: 0;
-    padding: 0;
     height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    text-align: center;
   }
 
   #display {
-    font-size: 60px;
-    font-weight: bold;
+    font-size: 56px;
     background: rgba(0,0,0,0.3);
-    padding: 20px 40px;
-    border-radius: 20px;
+    padding: 18px 36px;
+    border-radius: 18px;
     margin-bottom: 20px;
-    box-shadow: 0 0 20px #000;
   }
 
   button {
     font-size: 18px;
-    padding: 12px 25px;
-    margin: 5px;
+    padding: 12px 22px;
+    margin: 6px;
     border: none;
     border-radius: 10px;
-    cursor: pointer;
-    transition: 0.2s;
     font-weight: bold;
+    cursor: pointer;
   }
 
-  button:hover { transform: scale(1.1); }
+  .start { background:#4caf50; color:white; }
+  .stop  { background:#f44336; color:white; }
+  .reset { background:#ff9800; color:white; }
+  .timer { background:#2196f3; color:white; }
 
-  .start { background: #4caf50; color: #fff; }
-  .stop { background: #f44336; color: #fff; }
-  .reset { background: #ff9800; color: #fff; }
-  .timer { background: #2196f3; color: #fff; }
-
-  #timerInput {
+  input {
     font-size: 18px;
-    padding: 5px;
+    width: 90px;
+    padding: 6px;
     border-radius: 8px;
-    width: 80px;
+    border: none;
     text-align: center;
-    margin-right: 10px;
   }
 </style>
 </head>
@@ -63,96 +57,107 @@
 
 <div>
   <button class="start" id="startBtn">Start</button>
-  <button class="stop" id="stopBtn">Stop</button>
+  <button class="stop"  id="stopBtn">Stop</button>
   <button class="reset" id="resetBtn">Reset</button>
 </div>
 
-<div style="margin-top:15px;">
+<div style="margin-top:14px;">
   <input id="timerInput" type="number" placeholder="Seconds">
   <button class="timer" id="timerBtn">Start Timer</button>
 </div>
 
-<!-- Timer sound -->
-<audio id="timerSound" src="https://www.soundjay.com/buttons/sounds/beep-07.mp3" preload="auto"></audio>
-
 <script>
 let startTime = 0;
 let elapsed = 0;
-let timer = null;
+let raf = null;
 let timerMode = false;
 let timerTarget = 0;
 
+/* ULTRA SOFT BEEP */
+function softBeep() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = "sine";
+  osc.frequency.value = 800;   // soft pitch
+  gain.gain.value = 0.03;      // VERY quiet
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start();
+  osc.stop(ctx.currentTime + 0.08); // very short
+}
+
 function updateDisplay() {
-    let total = elapsed + (startTime ? Date.now() - startTime : 0);
+  let total = elapsed + (startTime ? Date.now() - startTime : 0);
 
-    if (timerMode) {
-        total = timerTarget - total;
-        if (total <= 0) {
-            total = 0;
-            stop();
-            document.getElementById('timerSound').play();
-        }
+  if (timerMode) {
+    total = timerTarget - total;
+    if (total <= 0) {
+      total = 0;
+      stop();
+      softBeep(); // gentle click
     }
+  }
 
-    let ms = total % 1000;
-    let secs = Math.floor(total / 1000) % 60;
-    let mins = Math.floor(total / 60000) % 60;
-    let hrs = Math.floor(total / 3600000);
+  let ms = total % 1000;
+  let s  = Math.floor(total / 1000) % 60;
+  let m  = Math.floor(total / 60000) % 60;
+  let h  = Math.floor(total / 3600000);
 
-    document.getElementById('display').textContent =
-        String(hrs).padStart(2,'0') + ':' +
-        String(mins).padStart(2,'0') + ':' +
-        String(secs).padStart(2,'0') + '.' +
-        String(ms).padStart(3,'0');
+  display.textContent =
+    String(h).padStart(2,"0") + ":" +
+    String(m).padStart(2,"0") + ":" +
+    String(s).padStart(2,"0") + "." +
+    String(ms).padStart(3,"0");
 }
 
 function tick() {
-    updateDisplay();
-    timer = requestAnimationFrame(tick);
+  updateDisplay();
+  raf = requestAnimationFrame(tick);
 }
 
 function start() {
-    if (!timer) {
-        startTime = Date.now();
-        timerMode = false;
-        timer = requestAnimationFrame(tick);
-    }
+  if (!raf) {
+    startTime = Date.now();
+    timerMode = false;
+    raf = requestAnimationFrame(tick);
+  }
 }
 
 function stop() {
-    if (timer) {
-        elapsed += Date.now() - startTime;
-        startTime = 0;
-        cancelAnimationFrame(timer);
-        timer = null;
-    }
+  if (raf) {
+    elapsed += Date.now() - startTime;
+    startTime = 0;
+    cancelAnimationFrame(raf);
+    raf = null;
+  }
 }
 
 function reset() {
-    stop();
-    elapsed = 0;
-    timerMode = false;
-    document.getElementById('display').textContent = "00:00:00.000";
+  stop();
+  elapsed = 0;
+  timerMode = false;
+  display.textContent = "00:00:00.000";
 }
 
 function startTimer() {
-    let seconds = parseInt(document.getElementById('timerInput').value);
-    if (isNaN(seconds) || seconds <= 0) {
-        alert("Please enter a valid number of seconds!");
-        return;
-    }
-    reset();
-    timerMode = true;
-    timerTarget = seconds * 1000;
-    startTime = Date.now();
-    timer = requestAnimationFrame(tick);
+  const seconds = Number(timerInput.value);
+  if (!seconds || seconds <= 0) return;
+
+  reset();
+  timerMode = true;
+  timerTarget = seconds * 1000;
+  startTime = Date.now();
+  raf = requestAnimationFrame(tick);
 }
 
-// Attach button events safely
-document.getElementById('startBtn').addEventListener('click', start);
-document.getElementById('stopBtn').addEventListener('click', stop);
-document.getElementById('resetBtn').addEventListener('click', reset);
-document.getElementById('timerBtn').addEventListener('click', startTimer);
+startBtn.onclick = start;
+stopBtn.onclick  = stop;
+resetBtn.onclick = reset;
+timerBtn.onclick = startTimer;
 </script>
 
 </body>
