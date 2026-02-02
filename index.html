@@ -59,18 +59,22 @@
 </style>
 </head>
 <body>
-  <div id="display">00:00:00.000</div>
 
-  <div>
-    <button class="start" onclick="start()">Start</button>
-    <button class="stop" onclick="stop()">Stop</button>
-    <button class="reset" onclick="reset()">Reset</button>
-  </div>
+<div id="display">00:00:00.000</div>
 
-  <div style="margin-top:15px;">
-    <input id="timerInput" type="number" placeholder="Seconds">
-    <button class="timer" onclick="startTimer()">Start Timer</button>
-  </div>
+<div>
+  <button class="start" onclick="start()">Start</button>
+  <button class="stop" onclick="stop()">Stop</button>
+  <button class="reset" onclick="reset()">Reset</button>
+</div>
+
+<div style="margin-top:15px;">
+  <input id="timerInput" type="number" placeholder="Seconds">
+  <button class="timer" onclick="startTimer()">Start Timer</button>
+</div>
+
+<!-- Timer sound -->
+<audio id="timerSound" src="https://www.soundjay.com/buttons/sounds/beep-07.mp3" preload="auto"></audio>
 
 <script>
 let startTime = 0;
@@ -87,13 +91,12 @@ function updateDisplay() {
         if (total <= 0) {
             total = 0;
             stop();
-            
+            document.getElementById('timerSound').play(); // sound effect
         }
     }
 
     let ms = total % 1000;
-    let secs = Math.floor(to<audio id="timerSound" src="https://www.soundjay.com/buttons/sounds/beep-07.mp3" preload="auto"></audio>
-tal / 1000) % 60;
+    let secs = Math.floor(total / 1000) % 60;
     let mins = Math.floor(total / 60000) % 60;
     let hrs = Math.floor(total / 3600000);
 
@@ -142,7 +145,6 @@ function startTimer() {
     reset();
     timerMode = true;
     timerTarget = seconds * 1000;
-
     startTime = Date.now();
     timer = requestAnimationFrame(tick);
 }
